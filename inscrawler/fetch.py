@@ -25,9 +25,6 @@ def fetch_mentions(raw_test, dict_obj):
         dict_obj["mentions"] = mentions
 
 def fetch_hashtags(raw_test, dict_obj):
-    if not settings.fetch_hashtags:
-        return
-
     hashtags = get_parsed_hashtags(raw_test)
     if hashtags:
         dict_obj["hashtags"] = hashtags
@@ -46,7 +43,7 @@ def fetch_imgs(browser, dict_post):
 
         if isinstance(ele_imgs, list):
             for ele_img in ele_imgs:
-                img_urls.add(ele_img.get_attribute("src"))
+                img_urls.add((ele_img.get_attribute("src"), ele_img.get_attribute("alt")))
         else:
             break
 
@@ -61,9 +58,6 @@ def fetch_imgs(browser, dict_post):
     dict_post["img_urls"] = list(img_urls)
 
 def fetch_likes_plays(browser, dict_post):
-    if not settings.fetch_likes_plays:
-        return
-
     likes = None
     el_likes = browser.find_one(".Nm9Fw > * > span")
     el_see_likes = browser.find_one(".vcOH2")
@@ -85,9 +79,7 @@ def fetch_likes_plays(browser, dict_post):
 
 
 def fetch_likers(browser, dict_post):
-    if not settings.fetch_likers:
-        return
-    like_info_btn = browser.find_one(".EDfFK ._0mzm-.sqdOP")
+    like_info_btn = browser.find_one(".EDfFK button")
     like_info_btn.click()
 
     likers = {}
@@ -183,14 +175,20 @@ def fetch_details(browser, dict_post):
 
     browser.open_new_tab(dict_post["key"])
 
-    username = browser.find_one("a.FPmhX")
+    username = browser.find_one("a.sqdOP")
     location = browser.find_one("a.O4GlU")
-
+    body_text = browser.find_one("div.C4VMK span")
+    
     if username:
         dict_post["username"] = username.text
     if location:
         dict_post["location"] = location.text
+    if body_text:
+        dict_post["body_text"] = body_text.text
 
-    fetch_initial_comment(browser, dict_post)
+    fetch_hashtags(body_text.text, dict_post)
+    fetch_likes_plays(browser, dict_post)
+    fetch_datetime(browser, dict_post)
+    fetch_imgs(browser, dict_post)
 
     browser.close_current_tab()

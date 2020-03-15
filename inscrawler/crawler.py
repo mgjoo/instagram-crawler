@@ -273,8 +273,7 @@ class InsCrawler(Logging):
                 if key not in key_set:
                     dict_post = { "key": key }
                     ele_img = browser.find_one(".KL4Bh img", ele)
-                    dict_post["caption"] = ele_img.get_attribute("alt")
-                    dict_post["img_url"] = ele_img.get_attribute("src")
+                    dict_post["main_img_url"] = (ele_img.get_attribute("src"), ele_img.get_attribute("alt"))
 
                     fetch_details(browser, dict_post)
 
